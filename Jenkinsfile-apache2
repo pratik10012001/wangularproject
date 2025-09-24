@@ -1,0 +1,29 @@
+pipeline {
+  agent any
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+    stage('Install & Build') {
+      steps {
+        sh '''
+          npm install
+          ./node_modules/.bin/ng build --configuration production
+        '''
+      }
+    }
+    stage('Deploy to Apache') {
+      steps {
+        sh '''
+          sudo rm -rf /var/www/html/*
+          sudo cp -r dist/angular-17-crud/* /var/www/html/
+          #sudo cp -r dist/angular-17-crud/browser /var/www/html/
+          sudo cp -r dist/angular-17-crud/3rdpartylicenses.txt /var/www/html/
+          sudo systemctl restart apache2 || sudo systemctl restart httpd
+        '''
+      }
+    }
+  }
+}
